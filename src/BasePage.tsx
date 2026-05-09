@@ -14,11 +14,12 @@ function BasePage() {
   const [numCrossings, setNumCrossings] = useState("3");
   const [rolfIndex, setRolfIndex] = useState("1");
   const [knotSvg, setKnotSvg] = useState("");
+  const [knotSvgError, setKnotSvgError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadOnStartup() {
       try {
-        const names = await api.fetchRolfNames();
+        const names = await api.fetchRolfNames();        
         const currentGeometry = await api.fetchDiagramInfo(numCrossings, rolfIndex);
         setKnotSvg(buildSvg(currentGeometry));
         setRolfNames(names)
@@ -32,6 +33,39 @@ function BasePage() {
     }
     loadOnStartup()
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadKnotSvg() {
+      if (!numCrossings || !rolfIndex) {
+        setKnotSvg("")
+        return
+      }
+
+      try {
+        setKnotSvg("")
+        setKnotSvgError(null)
+        const currentGeometry = await api.fetchDiagramInfo(numCrossings, rolfIndex);
+
+        if (!cancelled) {
+          setKnotSvg(buildSvg(currentGeometry));
+          setKnotSvgError(null)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setKnotSvg("")
+          setKnotSvgError(error instanceof Error ? error.message : 'Failed to load knot diagram')
+        }
+      }
+    }
+
+    loadKnotSvg()
+
+    return () => {
+      cancelled = true
+    }
+  }, [numCrossings, rolfIndex])
 
   function getSinglePanelLabel(kind: ui.PanelKind) {
     return kind === 'moves' ? 'moves' : 'invariants'
@@ -81,12 +115,21 @@ function BasePage() {
     <div className="background">
       <div className="container">
         <div className="knot_box">
+          <ui.KnotPicker
+            rolfNames={rolfNames}
+            rolfNamesLoading={rolfNamesLoading}
+            numCrossings={numCrossings}
+            rolfIndex={rolfIndex}
+            setNumCrossings={setNumCrossings}
+            setRolfIndex={setRolfIndex}
+          />
           {knotSvg ? (
             <div className="knot_svg" dangerouslySetInnerHTML={{ __html: knotSvg }} />
           ) : (
             <p className="knot_status">
               {rolfNamesLoading ? 'Loading knot options...' :
                 rolfNamesError ? rolfNamesError  : 
+                knotSvgError ? knotSvgError :
                 `${rolfNames.length} Rolf crossing groups loaded.`
               }
             </p>

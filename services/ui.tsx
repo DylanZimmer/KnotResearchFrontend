@@ -1,5 +1,6 @@
 import type { Dispatch, KeyboardEvent, PointerEvent, ReactNode, RefObject, SetStateAction } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { RolfKnotNames } from './types';
 
 export type PanelMode = 'moves' | 'invariants' | 'both';
 export type PanelKind = Exclude<PanelMode, 'both'>;
@@ -7,6 +8,115 @@ export type PanelKind = Exclude<PanelMode, 'both'>;
 export const MIN_PANEL_SPLIT = 0.25;
 export const MAX_PANEL_SPLIT = 0.75;
 const PANEL_SPLIT_KEYBOARD_STEP = 0.05;
+
+type KnotPickerProps = {
+  rolfNames: RolfKnotNames
+  rolfNamesLoading: boolean
+  numCrossings: string
+  rolfIndex: string
+  setNumCrossings: Dispatch<SetStateAction<string>>
+  setRolfIndex: Dispatch<SetStateAction<string>>
+}
+
+export function KnotPicker({
+  rolfNames,
+  rolfNamesLoading,
+  numCrossings,
+  rolfIndex,
+  setNumCrossings,
+  setRolfIndex,
+}: KnotPickerProps) {
+  const [draftNumCrossings, setDraftNumCrossings] = useState(numCrossings)
+  const [draftRolfIndex, setDraftRolfIndex] = useState(rolfIndex)
+  const crossingNums = rolfNames.map((group) => group.numCrossings)
+  const selectedGroup = rolfNames.find((group) => group.numCrossings === draftNumCrossings)
+  const rolfIndices = selectedGroup?.rolfIndexes ?? []
+  const canSubmit =
+    Boolean(draftNumCrossings) &&
+    Boolean(draftRolfIndex) &&
+    (draftNumCrossings !== numCrossings || draftRolfIndex !== rolfIndex)
+
+  useEffect(() => {
+    setDraftNumCrossings(numCrossings)
+  }, [numCrossings])
+
+  useEffect(() => {
+    setDraftRolfIndex(rolfIndex)
+  }, [rolfIndex])
+
+  function handleNumCrossingsChange(value: string) {
+    setDraftNumCrossings(value)
+
+    const nextGroup = rolfNames.find((group) => group.numCrossings === value)
+    setDraftRolfIndex(nextGroup?.rolfIndexes[0] ?? '')
+  }
+
+  function handleSubmit() {
+    if (!canSubmit) {
+      return
+    }
+
+    setNumCrossings(draftNumCrossings)
+    setRolfIndex(draftRolfIndex)
+  }
+
+  return (
+    <div className="knot_picker" aria-label="Knot selector">
+      <select
+        id="knot-crossing-num"
+        className="knot_picker_input"
+        aria-label="crossing number"
+        value={draftNumCrossings}
+        disabled={rolfNamesLoading || crossingNums.length === 0}
+        onChange={(event) => handleNumCrossingsChange(event.target.value)}
+      >
+        {rolfNamesLoading ? (
+          <option value="">Loading knots...</option>
+        ) : crossingNums.length === 0 ? (
+          <option value="">No crossing numbers found</option>
+        ) : (
+          crossingNums.map((crossingNum) => (
+            <option key={crossingNum} value={crossingNum}>
+              {crossingNum}
+            </option>
+          ))
+        )}
+      </select>
+      <span className="knot_picker_sep" aria-hidden="true">
+        _
+      </span>
+      <select
+        id="knot-rolf-index"
+        className="knot_picker_input"
+        aria-label="Rolfsen index"
+        value={draftRolfIndex}
+        disabled={rolfNamesLoading || rolfIndices.length === 0}
+        onChange={(event) => setDraftRolfIndex(event.target.value)}
+      >
+        {rolfNamesLoading ? (
+          <option value="">Loading knots...</option>
+        ) : rolfIndices.length === 0 ? (
+          <option value="">No Rolfsen indices found</option>
+        ) : (
+          rolfIndices.map((nextRolfIndex) => (
+            <option key={nextRolfIndex} value={nextRolfIndex}>
+              {nextRolfIndex}
+            </option>
+          ))
+        )}
+      </select>
+      <button
+        type="button"
+        className="knot_picker_go"
+        aria-label="Load selected knot"
+        disabled={!canSubmit}
+        onClick={handleSubmit}
+      >
+        Go
+      </button>
+    </div>
+  )
+}
 
 function clampPanelSplit(value: number) {
   return Math.min(MAX_PANEL_SPLIT, Math.max(MIN_PANEL_SPLIT, value));
