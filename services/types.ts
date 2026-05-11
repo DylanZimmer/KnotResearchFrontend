@@ -41,3 +41,9 @@ export type RolfKnotName = {
   rolfIndexes: string[]
 };
 export type RolfKnotNames = RolfKnotName[];
+
+export type Invariants = {
+  determinant: number;
+  alexander_polynomial: string;
+  jones_polynomial: string;
+}

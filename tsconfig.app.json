@@ -24,5 +24,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "shared/**/*.ts", "services/types.ts"]
+  "include": ["src", "shared/**/*.ts", "services/types.ts", "services/functions/moves_in_fn.ts", "services/functions/calculate_invariants.ts"]
 }

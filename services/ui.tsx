@@ -14,8 +14,7 @@ type KnotPickerProps = {
   rolfNamesLoading: boolean
   numCrossings: string
   rolfIndex: string
-  setNumCrossings: Dispatch<SetStateAction<string>>
-  setRolfIndex: Dispatch<SetStateAction<string>>
+  onSubmit: (numCrossings: string, rolfIndex: string) => void | Promise<void>
 }
 
 export function KnotPicker({
@@ -23,8 +22,7 @@ export function KnotPicker({
   rolfNamesLoading,
   numCrossings,
   rolfIndex,
-  setNumCrossings,
-  setRolfIndex,
+  onSubmit,
 }: KnotPickerProps) {
   const [draftNumCrossings, setDraftNumCrossings] = useState(numCrossings)
   const [draftRolfIndex, setDraftRolfIndex] = useState(rolfIndex)
@@ -56,8 +54,7 @@ export function KnotPicker({
       return
     }
 
-    setNumCrossings(draftNumCrossings)
-    setRolfIndex(draftRolfIndex)
+    void onSubmit(draftNumCrossings, draftRolfIndex)
   }
 
   return (

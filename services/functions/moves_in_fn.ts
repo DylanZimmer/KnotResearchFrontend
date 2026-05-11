@@ -1,4 +1,4 @@
-import type { FullNotation, FullNotationEntry } from '../services/types.ts';
+import type { FullNotation, FullNotationEntry } from '../types.ts';
 
 /*
 Full Notation:
