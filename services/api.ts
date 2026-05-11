@@ -1,6 +1,6 @@
 import type { RolfKnotNames, Geometry, Invariants } from './types'
 
-const apiBaseUrl = 'https://knots-backend-smjr.onrender.com'
+const apiBaseUrl = ${apiBaseUrlSecret}
 
 
 export async function fetchRolfNames(): Promise<RolfKnotNames> {
