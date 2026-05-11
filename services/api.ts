@@ -1,7 +1,6 @@
 import type { RolfKnotNames, Geometry, Invariants } from './types'
 
-const apiBaseUrl = ${apiBaseUrlSecret}
-
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 export async function fetchRolfNames(): Promise<RolfKnotNames> {
   const res = await fetch(`${apiBaseUrl}/api/knots/rolf_names`);
