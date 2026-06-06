@@ -5,8 +5,53 @@ import * as type from '../services/types';
 import * as ui from '../services/ui';
 import * as geometryMoves from '../services/functions/geometry_moves';
 import { buildSvg } from '../services/buildSvg';
+import { GeometricLineInput } from '../services/components/geometric_line_input';
 
 type InvariantKey = keyof type.Invariants;
+type TwistHandedness = 'l' | 'r';
+
+type OneLineMoveInputProps = {
+  onSubmit: (line: type.GeometricLine, handedness: TwistHandedness) => void;
+};
+
+const defaultGeometricLine: type.GeometricLine = {
+  cid1: 1,
+  placement1: 'over',
+  cid2: 0,
+  placement2: 'under',
+};
+
+function OneLineMoveInput({ onSubmit }: OneLineMoveInputProps) {
+  const [line, setLine] = useState<type.GeometricLine>(defaultGeometricLine);
+  const [handedness, setHandedness] = useState<TwistHandedness>('l');
+
+  return (
+    <div className="one_line_move_input">
+      <GeometricLineInput value={line} onChange={setLine} />
+      <div className="twist_control_row">
+        <div className="handedness_control">
+          <span className="handedness_label">Handedness:</span>
+          <div className="handedness_toggle" aria-label="Twist handedness">
+            {(['l', 'r'] as TwistHandedness[]).map((nextHandedness) => (
+              <button
+                key={nextHandedness}
+                type="button"
+                className={`handedness_toggle_button${handedness === nextHandedness ? ' handedness_toggle_button--active' : ''}`}
+                aria-pressed={handedness === nextHandedness}
+                onClick={() => setHandedness(nextHandedness)}
+              >
+                {nextHandedness}
+              </button>
+            ))}
+          </div>
+        </div>
+        <button type="button" className="move_action_button twist_apply_button" onClick={() => onSubmit(line, handedness)}>
+          Apply
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function BasePage() {
   const [rolfNames, setRolfNames] = useState<type.RolfKnotNames>([]);
@@ -30,6 +75,7 @@ function BasePage() {
       try {
         const names = await api.fetchRolfNames();
         const currentGeometry = await api.fetchRolfDiagramInfo(1); //hardcode to open on trefoil
+        console.log("###################", currentGeometry);
         const currentInvariants = await api.fetchInvariantInfo(1); //hardcode to open on trefoil
         setKnotSvg(buildSvg(currentGeometry));
         setInvariants(currentInvariants);
@@ -127,6 +173,25 @@ function BasePage() {
     }
   }
 
+  async function handleMoveWithArgument(moveName: string, line: type.GeometricLine, handedness: TwistHandedness) {
+    const move = geometryMoves.movesWithArgument[moveName];
+
+    if (!move) {
+      return;
+    }
+
+    try {
+      setActiveMoveName(moveName);
+      setKnotSvgError(null);
+      const currentGeometry = await move.fn(line, handedness);
+      setKnotSvg(buildSvg(currentGeometry));
+    } catch (error) {
+      setKnotSvgError(error instanceof Error ? error.message : `Failed to apply ${moveName}`);
+    } finally {
+      setActiveMoveName(null);
+    }
+  }
+
   function renderInvariantSelector() {
     return (
       <div className="selector_panel">
@@ -195,6 +260,18 @@ function BasePage() {
             >
               {activeMoveName === moveName ? 'Applying...' : moveName}
             </button>
+          ))}
+        </div>
+        <div className="move_list">
+          {Object.entries(geometryMoves.movesWithArgument).map(([moveName, move]) => (
+            <div key={moveName} className="move_with_args">
+              <div className="move_name">{moveName}</div>
+              {move.argKind === 'one_line_and_handedness' && (
+                <OneLineMoveInput
+                  onSubmit={(line, handedness) => handleMoveWithArgument(moveName, line, handedness)}
+                />
+              )}
+            </div>
           ))}
         </div>
       </div>

@@ -1,6 +1,7 @@
-import type { RolfKnotNames, Geometry, Invariants } from './types'
+import type { RolfKnotNames, Geometry, Invariants, GeometricLine } from './types'
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+//const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+const apiBaseUrl = "https://knots-backend-smjr.onrender.com";
 
 export async function fetchRolfNames(): Promise<RolfKnotNames> {
   const res = await fetch(`${apiBaseUrl}/api/knots/rolf_names`);
@@ -80,5 +81,16 @@ export async function performOrientationFlipGeometry() {
   });
   if (!res.ok) {
     throw new Error("Failed to create mirror knot");
+  }
+}
+
+export async function performAddTwist(line: GeometricLine, handedness: string) {
+  const res = await fetch(`${apiBaseUrl}/api/knots/add_twist`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", },
+    body: JSON.stringify({ line, handedness }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to add twist");
   }
 }

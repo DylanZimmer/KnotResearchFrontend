@@ -1,11 +1,8 @@
 export type NumPair = [number, number];
 export type NumPairs = NumPair[];
 
-export type CrossingSpec = [crossing_id: number, under_line: number, over_line: number];
+export type CrossingSpec = [crossing_id: number, under_line: number, over_line: number, crossing_x: number, crossing_y: number];
 export type CrossingSpecs = CrossingSpec[];
-
-export type CrossingFullSpec = [crossing_id: number, under_line: number, over_line: number, crossing_x: number, crossing_y: number];
-export type CrossingFullSpecs = CrossingFullSpec[];
 
 export type Placement = 'over' | 'under';
 export type Position = Placement;
@@ -46,4 +43,11 @@ export type Invariants = {
   determinant: number;
   alexander_polynomial: string;
   jones_polynomial: string;
+}
+
+export type GeometricLine = {
+  cid1: number;
+  placement1: Placement;
+  cid2: number;
+  placement2: Placement;
 }
