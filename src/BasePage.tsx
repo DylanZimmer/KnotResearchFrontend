@@ -302,51 +302,56 @@ function BasePage() {
     )
   }
   return (
-    <div className="background">
-      <div className="container">
-        <div className="knot_box">
-          <ui.KnotPicker
-            rolfNames={rolfNames}
-            rolfNamesLoading={rolfNamesLoading}
-            numCrossings={numCrossings}
-            rolfIndex={rolfIndex}
-            onSubmit={handleKnotSubmit}
-          />
-          {knotSvg ? (
-            <div className="knot_svg" dangerouslySetInnerHTML={{ __html: knotSvg }} />
+    <>
+      <div className="maintenance_overlay" role="status" aria-live="polite">
+        <p>Currently undergoing database refactoring, will be back shortly</p>
+      </div>
+      <div className="background" aria-hidden="true">
+        <div className="container">
+          <div className="knot_box">
+            <ui.KnotPicker
+              rolfNames={rolfNames}
+              rolfNamesLoading={rolfNamesLoading}
+              numCrossings={numCrossings}
+              rolfIndex={rolfIndex}
+              onSubmit={handleKnotSubmit}
+            />
+            {knotSvg ? (
+              <div className="knot_svg" dangerouslySetInnerHTML={{ __html: knotSvg }} />
+            ) : (
+              <p className="knot_status">
+                {rolfNamesLoading ? 'Loading knot options...' :
+                  rolfNamesError ? rolfNamesError  : 
+                  knotSvgError ? knotSvgError :
+                  `${rolfNames.length} Rolf crossing groups loaded.`
+                }
+              </p>
+            )}
+          </div>
+          {isEditingInvariants ? (
+            <div className="right_col">
+              <div className="invariants_box panel_box panel_box--single">
+                <div className="panel_header">shown invariants</div>
+                <div className="panel_body">{renderInvariantSelector()}</div>
+              </div>
+            </div>
+          ) : panelMode === 'both' ? (
+            <div className="right_col right_col--split">
+              <ui.ResizablePanelStack movesContent={renderPanelContent('moves')} invariantsContent={renderPanelContent('invariants')} />
+              <ui.MovesOrInvariantButtons panelMode={panelMode} setPanelMode={setPanelMode} />
+            </div>
           ) : (
-            <p className="knot_status">
-              {rolfNamesLoading ? 'Loading knot options...' :
-                rolfNamesError ? rolfNamesError  : 
-                knotSvgError ? knotSvgError :
-                `${rolfNames.length} Rolf crossing groups loaded.`
-              }
-            </p>
+            <div className="right_col">
+              <div className={`${panelMode}_box panel_box panel_box--single`}>
+                <div className="panel_header">{getSinglePanelLabel(panelMode)}</div>
+                <div className="panel_body">{renderPanelContent(panelMode)}</div>
+              </div>
+              <ui.MovesOrInvariantButtons panelMode={panelMode} setPanelMode={setPanelMode} />
+            </div>
           )}
         </div>
-        {isEditingInvariants ? (
-          <div className="right_col">
-            <div className="invariants_box panel_box panel_box--single">
-              <div className="panel_header">shown invariants</div>
-              <div className="panel_body">{renderInvariantSelector()}</div>
-            </div>
-          </div>
-        ) : panelMode === 'both' ? (
-          <div className="right_col right_col--split">
-            <ui.ResizablePanelStack movesContent={renderPanelContent('moves')} invariantsContent={renderPanelContent('invariants')} />
-            <ui.MovesOrInvariantButtons panelMode={panelMode} setPanelMode={setPanelMode} />
-          </div>
-        ) : (
-          <div className="right_col">
-            <div className={`${panelMode}_box panel_box panel_box--single`}>
-              <div className="panel_header">{getSinglePanelLabel(panelMode)}</div>
-              <div className="panel_body">{renderPanelContent(panelMode)}</div>
-            </div>
-            <ui.MovesOrInvariantButtons panelMode={panelMode} setPanelMode={setPanelMode} />
-          </div>
-        )}
       </div>
-    </div>
+    </>
   )
 }
 
