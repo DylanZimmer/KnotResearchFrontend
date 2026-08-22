@@ -1,7 +1,13 @@
 export type NumPair = [number, number];
 export type NumPairs = NumPair[];
 
-export type CrossingSpec = [crossing_id: number, under_line: number, over_line: number, crossing_x: number, crossing_y: number];
+export type CrossingSpec = [
+  crossing_id: number,
+  under_line: number | null,
+  over_line: number | null,
+  crossing_x: number,
+  crossing_y: number,
+];
 export type CrossingSpecs = CrossingSpec[];
 
 export type Placement = 'over' | 'under';
@@ -26,10 +32,10 @@ export type Geometry = {
 };
 
 export type VertexAndArrow = {
-  start_point: number;
-  end_point: number;
+  point: number;
   strand_x: number;
   strand_y: number;
+  handedness: string | null;
 };
 export type VerticesAndArrows = VertexAndArrow[];
 

@@ -1,7 +1,96 @@
-import type { RolfKnotNames, Geometry, Invariants, GeometricLine } from './types'
+import type { RolfKnotNames, Geometry, Invariants, GeometricLine, CrossingSpec } from './types'
 
 //const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 const apiBaseUrl = "https://knots-backend-smjr.onrender.com";
+
+type JsonRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is JsonRecord {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function asNumber(value: unknown, field: string): number {
+  const number = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(number)) {
+    throw new Error(`Invalid ${field} in diagram info`);
+  }
+  return number;
+}
+
+function asNullableNumber(value: unknown, field: string): number | null {
+  return value === null || value === undefined ? null : asNumber(value, field);
+}
+
+/** Convert database-shaped diagram rows to the compact format used by buildSvg. */
+export function normalizeGeometry(payload: unknown): Geometry {
+  if (!isRecord(payload)) {
+    throw new Error('Unexpected diagram info response');
+  }
+
+  const crossings = payload.crossing_specs;
+  if (!Array.isArray(crossings)) {
+    throw new Error('Diagram info is missing crossing_specs');
+  }
+
+  const vertexRows = payload.vertices_and_arrows;
+  const sortedVertices = Array.isArray(vertexRows)
+    ? vertexRows.map((row) => {
+        if (!isRecord(row)) throw new Error('Invalid vertices_and_arrows row');
+        return {
+          point: asNumber(row.point, 'point'),
+          position: [
+            asNumber(row.strand_x, 'strand_x'),
+            asNumber(row.strand_y, 'strand_y'),
+          ] as [number, number],
+        };
+      }).sort((left, right) => left.point - right.point)
+    : Array.isArray(payload.vertex_positions)
+      ? payload.vertex_positions.map((position, point) => {
+          if (!Array.isArray(position) || position.length < 2) {
+            throw new Error('Invalid vertex_positions entry');
+          }
+          return {
+            point,
+            position: [
+              asNumber(position[0], 'vertex x'),
+              asNumber(position[1], 'vertex y'),
+            ] as [number, number],
+          };
+        })
+      : (() => { throw new Error('Diagram info is missing vertex positions'); })();
+
+  if (sortedVertices.length === 0) {
+    throw new Error('Diagram info contains no vertices');
+  }
+
+  const pointIndexes = new Map(sortedVertices.map((vertex, index) => [vertex.point, index]));
+  // `point` is the traversal order. Each line runs to the next point and the
+  // final line closes the knot back to the first point.
+  const arrows = sortedVertices.map((vertex, index) => {
+    const nextPoint = sortedVertices[(index + 1) % sortedVertices.length].point;
+    return [pointIndexes.get(vertex.point)!, pointIndexes.get(nextPoint)!] as [number, number];
+  });
+
+  const crossing_specs: CrossingSpec[] = crossings.map((row): CrossingSpec => {
+    if (Array.isArray(row)) return row as Geometry['crossing_specs'][number];
+    if (!isRecord(row)) throw new Error('Invalid crossing_specs row');
+    const underLine = asNullableNumber(row.under_line, 'under_line');
+    const overLine = asNullableNumber(row.over_line, 'over_line');
+    return [
+      asNumber(row.crossing_id, 'crossing_id'),
+      underLine === null ? null : pointIndexes.get(underLine) ?? underLine,
+      overLine === null ? null : pointIndexes.get(overLine) ?? overLine,
+      asNumber(row.crossing_x, 'crossing_x'),
+      asNumber(row.crossing_y, 'crossing_y'),
+    ];
+  }).sort((left, right) => left[0] - right[0]);
+
+  return {
+    vertex_positions: sortedVertices.map((vertex) => vertex.position),
+    arrows,
+    crossing_specs,
+  };
+}
 
 export async function fetchRolfNames(): Promise<RolfKnotNames> {
   const res = await fetch(`${apiBaseUrl}/api/knots/rolf_names`);
@@ -36,7 +125,7 @@ export async function fetchDiagramInfo(): Promise<Geometry> {
   if (!res.ok) {
     throw new Error(payload?.error || 'Failed to load diagram info');
   }
-  return payload;
+  return normalizeGeometry(payload);
 };
 
 export async function fetchRolfDiagramInfo(diagramId: number): Promise<Geometry> {
@@ -45,7 +134,7 @@ export async function fetchRolfDiagramInfo(diagramId: number): Promise<Geometry>
   if (!res.ok) {
     throw new Error(payload?.error || 'Failed to load diagram info');
   }
-  return payload;
+  return normalizeGeometry(payload);
 };
 
 export async function fetchInvariantInfo(knotId: number): Promise<Invariants> {
@@ -57,8 +146,8 @@ export async function fetchInvariantInfo(knotId: number): Promise<Invariants> {
   return payload;
 };
 
-export async function postBaseGeometryInfo(diagramId: number) {
-  const res = await fetch(`${apiBaseUrl}/api/knots/copy_over?diagramId=${diagramId}`, {
+export async function postBaseGeometryInfo(knotId: number) {
+  const res = await fetch(`${apiBaseUrl}/api/moves/populate_current?knotId=${knotId}`, {
     method: "POST",
   });
   if (!res.ok) {
@@ -67,7 +156,7 @@ export async function postBaseGeometryInfo(diagramId: number) {
 };
 
 export async function performMirrorGeometry() {
-  const res = await fetch(`${apiBaseUrl}/api/knots/mirror`, {
+  const res = await fetch(`${apiBaseUrl}/api/moves/mirror`, {
     method: "POST",
   });
   if (!res.ok) {
@@ -76,7 +165,7 @@ export async function performMirrorGeometry() {
 }
 
 export async function performOrientationFlipGeometry() {
-  const res = await fetch(`${apiBaseUrl}/api/knots/orientation_flip`, {
+  const res = await fetch(`${apiBaseUrl}/api/moves/orientation_flip`, {
     method: "POST",
   });
   if (!res.ok) {

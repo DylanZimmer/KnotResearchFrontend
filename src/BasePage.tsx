@@ -302,11 +302,7 @@ function BasePage() {
     )
   }
   return (
-    <>
-      <div className="maintenance_overlay" role="status" aria-live="polite">
-        <p>Currently undergoing database refactoring, will be back shortly</p>
-      </div>
-      <div className="background" aria-hidden="true">
+      <div className="background">
         <div className="container">
           <div className="knot_box">
             <ui.KnotPicker
@@ -351,7 +347,6 @@ function BasePage() {
           )}
         </div>
       </div>
-    </>
   )
 }
 
