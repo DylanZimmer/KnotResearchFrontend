@@ -14,7 +14,7 @@ function orientationArrowSvg(
   cx: number, cy: number,
   dx: number, dy: number,
   size = 6,
-  color = "#e05252",
+  color = "#71d6c5",
 ): string {
   const s = size;
   let pts: string;
@@ -66,7 +66,7 @@ export function buildSvg({ vertex_positions, arrows, crossing_specs }: Geometry)
 
   lines.push(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" `
-    + `viewBox="0 0 ${W} ${H}" style="background:#fafafa;font-family:monospace;">`,
+    + `viewBox="0 0 ${W} ${H}" style="background:transparent;font-family:monospace;">`,
   );
 
   // Base strands
@@ -76,7 +76,7 @@ export function buildSvg({ vertex_positions, arrows, crossing_specs }: Geometry)
     lines.push(
       `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" `
       + `x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" `
-      + `stroke="#1f4f82" stroke-width="${STROKE}" stroke-linecap="round"/>`,
+      + `stroke="#f7f7f5" stroke-width="${STROKE}" stroke-linecap="round"/>`,
     );
   }
 
@@ -124,13 +124,13 @@ export function buildSvg({ vertex_positions, arrows, crossing_specs }: Geometry)
       // Layer 1 — outgoing arc: A → B
       lines.push(
         `<path d="M ${fmt(A)} C ${fmt(cp1)},${fmt(cp2)},${fmt(B)}" `
-        + `fill="none" stroke="#1f4f82" stroke-width="${STROKE}" stroke-linecap="round"/>`,
+        + `fill="none" stroke="#f7f7f5" stroke-width="${STROKE}" stroke-linecap="round"/>`,
       );
  
       // Layer 1 — return arc: B → T (will be partially erased at re-crossing)
       lines.push(
         `<path d="M ${fmt(B)} C ${fmt(cp3)},${fmt(cp4)},${fmt(T)}" `
-        + `fill="none" stroke="#1f4f82" stroke-width="${STROKE}" stroke-linecap="round"/>`,
+        + `fill="none" stroke="#f7f7f5" stroke-width="${STROKE}" stroke-linecap="round"/>`,
       );
  
       // Layer 2 — erase the under-strand at the re-crossing point
@@ -139,7 +139,7 @@ export function buildSvg({ vertex_positions, arrows, crossing_specs }: Geometry)
       lines.push(
         `<line x1="${gS[0].toFixed(1)}" y1="${gS[1].toFixed(1)}" `
         + `x2="${gE[0].toFixed(1)}" y2="${gE[1].toFixed(1)}" `
-        + `stroke="#fafafa" stroke-width="${GAP_STROKE}" stroke-linecap="round"/>`,
+        + `stroke="#202124" stroke-width="${GAP_STROKE}" stroke-linecap="round"/>`,
       );
  
       // Layer 3 — repaint the over-strand on top
@@ -148,14 +148,14 @@ export function buildSvg({ vertex_positions, arrows, crossing_specs }: Geometry)
         const rS = pt(REACH - GAP * 0.5, BULGE * 0.06);
         lines.push(
           `<path d="M ${fmt(rS)} C ${fmt(cp4)},${fmt(cp4)},${fmt(T)}" `
-          + `fill="none" stroke="#1f4f82" stroke-width="${STROKE}" stroke-linecap="round"/>`,
+          + `fill="none" stroke="#f7f7f5" stroke-width="${STROKE}" stroke-linecap="round"/>`,
         );
       } else {
         // Main strand is on top — repaint it straight across the re-crossing
         lines.push(
           `<line x1="${gS[0].toFixed(1)}" y1="${gS[1].toFixed(1)}" `
           + `x2="${gE[0].toFixed(1)}" y2="${gE[1].toFixed(1)}" `
-          + `stroke="#1f4f82" stroke-width="${STROKE}" stroke-linecap="round"/>`,
+          + `stroke="#f7f7f5" stroke-width="${STROKE}" stroke-linecap="round"/>`,
         );
       }
  
@@ -164,7 +164,7 @@ export function buildSvg({ vertex_positions, arrows, crossing_specs }: Geometry)
         `<text x="${(cx + 16).toFixed(1)}" y="${(cy - 16).toFixed(1)}" `
         + `text-anchor="middle" dominant-baseline="central" `
         + `font-size="${FONT + 4}" font-weight="bold" `
-        + `fill="#f0c040" stroke="#fafafa" stroke-width="3" paint-order="stroke">`
+        + `fill="#71d6c5" stroke="#202124" stroke-width="3" paint-order="stroke">`
         + `C${crossing_id}</text>`,
       );
       continue;
@@ -187,12 +187,12 @@ export function buildSvg({ vertex_positions, arrows, crossing_specs }: Geometry)
     lines.push(
       `<line x1="${gap[0].toFixed(1)}" y1="${gap[1].toFixed(1)}" `
       + `x2="${gap[2].toFixed(1)}" y2="${gap[3].toFixed(1)}" `
-      + `stroke="#fafafa" stroke-width="${GAP_STROKE}" stroke-linecap="round"/>`,
+      + `stroke="#202124" stroke-width="${GAP_STROKE}" stroke-linecap="round"/>`,
     );
     lines.push(
       `<line x1="${patch[0].toFixed(1)}" y1="${patch[1].toFixed(1)}" `
       + `x2="${patch[2].toFixed(1)}" y2="${patch[3].toFixed(1)}" `
-      + `stroke="#1f4f82" stroke-width="${STROKE}" stroke-linecap="round"/>`,
+      + `stroke="#f7f7f5" stroke-width="${STROKE}" stroke-linecap="round"/>`,
     );
 
     // Crossing label
@@ -200,7 +200,7 @@ export function buildSvg({ vertex_positions, arrows, crossing_specs }: Geometry)
       `<text x="${(cx + 16).toFixed(1)}" y="${(cy - 16).toFixed(1)}" `
       + `text-anchor="middle" dominant-baseline="central" `
       + `font-size="${FONT + 4}" font-weight="bold" `
-      + `fill="#f0c040" stroke="#fafafa" stroke-width="3" paint-order="stroke">`
+      + `fill="#71d6c5" stroke="#202124" stroke-width="3" paint-order="stroke">`
       + `C${crossing_id}</text>`,
     );
 
