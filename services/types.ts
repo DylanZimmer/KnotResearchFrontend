@@ -25,10 +25,13 @@ export interface FullNotationLine {
 export type FullNotationEntry = FullNotationLine;
 export type FullNotation = FullNotationLine[];
 
+export type Handedness = "R" | "L";
+
 export type Geometry = {
   vertex_positions: NumPairs
   arrows: NumPairs
   crossing_specs: CrossingSpecs
+  handedness?: Handedness
 };
 
 export type VertexAndArrow = {

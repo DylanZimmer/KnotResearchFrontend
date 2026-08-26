@@ -1,7 +1,8 @@
-import type { RolfKnotNames, Geometry, Invariants, GeometricLine, CrossingSpec } from './types'
+import type { RolfKnotNames, Geometry, Invariants, GeometricLine, CrossingSpec, Handedness } from './types'
 
 //const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 const apiBaseUrl = "https://knots-backend-smjr.onrender.com";
+//const apiBaseUrl = "http://localhost:8080";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -85,10 +86,18 @@ export function normalizeGeometry(payload: unknown): Geometry {
     ];
   }).sort((left, right) => left[0] - right[0]);
 
+  let handedness : Handedness;
+  if (payload.handedness != "L" && payload.handedness != "R") {
+    handedness = "R";
+  } else {
+    handedness = payload.handedness as Handedness;
+  }
+
   return {
     vertex_positions: sortedVertices.map((vertex) => vertex.position),
     arrows,
     crossing_specs,
+    handedness
   };
 }
 
@@ -120,7 +129,7 @@ export async function fetchDiagramId(num_crossings: string, rolf_index: string):
 }
 
 export async function fetchDiagramInfo(): Promise<Geometry> {
-  const res = await fetch(`${apiBaseUrl}/api/knots/diagram_info`);
+  const res = await fetch(`${apiBaseUrl}/api/geom/diagram_info`);
   const payload = await res.json();
   if (!res.ok) {
     throw new Error(payload?.error || 'Failed to load diagram info');
@@ -129,7 +138,7 @@ export async function fetchDiagramInfo(): Promise<Geometry> {
 };
 
 export async function fetchRolfDiagramInfo(diagramId: number): Promise<Geometry> {
-  const res = await fetch(`${apiBaseUrl}/api/knots/diagram_info?diagramId=${diagramId}`);
+  const res = await fetch(`${apiBaseUrl}/api/geom/diagram_info?diagramId=${diagramId}`);
   const payload = await res.json();
   if (!res.ok) {
     throw new Error(payload?.error || 'Failed to load diagram info');
@@ -138,7 +147,7 @@ export async function fetchRolfDiagramInfo(diagramId: number): Promise<Geometry>
 };
 
 export async function fetchInvariantInfo(knotId: number): Promise<Invariants> {
-  const res = await fetch(`${apiBaseUrl}/api/knots/rolf_invariants?knotId=${knotId}`);
+  const res = await fetch(`${apiBaseUrl}/api/rolf/rolf_invariants?knotId=${knotId}`);
   const payload = await res.json();
   if (!res.ok) {
     throw new Error(payload?.error || 'Failed to load invariant info');
