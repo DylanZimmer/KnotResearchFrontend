@@ -40,10 +40,191 @@ body {
   line-height: 1.25;
 }
 
-/* background color for the whole app */
+/* top-level page tabs */
+.base_page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #151617;
+}
+
+.page_tabs {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 8px 12px 0;
+  border-bottom: 1px solid #3b3e41;
+  background: #1b1d1f;
+}
+
+.page_tab {
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 9px 9px 0 0;
+  background: transparent;
+  color: #9da3a6;
+  padding: 9px 16px 10px;
+  font-size: 0.82rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.page_tab:hover {
+  color: #fff;
+  background: #292b2e;
+}
+
+.page_tab--active {
+  border-color: #3b3e41;
+  background: #303235;
+  color: #fff;
+}
+
+.page_tab:focus-visible {
+  outline: 2px solid #71d6c5;
+  outline-offset: 2px;
+}
+
+.page_content {
+  flex: 1;
+  min-height: 0;
+}
+
+.page_content[hidden] {
+  display: none;
+}
+
+.run_experiment {
+  display: grid;
+  grid-template-columns: minmax(660px, 1fr) minmax(280px, 1fr);
+  align-content: start;
+  gap: 24px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 24px;
+  overflow-y: auto;
+  background: radial-gradient(circle at 25% 15%, #303335 0, #1c1e20 42%, #151617 100%);
+}
+
+.run_experiment_card,
+.experiment_summary_card {
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid #3b3e41;
+  border-radius: 18px;
+  background: #202124;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+}
+
+.run_experiment_card {
+  padding: clamp(28px, 3vw, 56px);
+}
+
+.experiment_summary_card {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  min-height: 420px;
+}
+
+.experiment_summary_section {
+  padding: 28px;
+}
+
+.experiment_summary_section + .experiment_summary_section {
+  border-top: 1px solid #3b3e41;
+}
+
+.experiment_summary_section h2 {
+  margin: 0;
+  color: #e8e9e7;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.experiment_knot_ranges {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0 0;
+  padding-left: 24px;
+  color: #e8e9e7;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1100px) {
+  .run_experiment { grid-template-columns: minmax(0, 1fr); }
+}
+
+.run_experiment_card h1 {
+  margin: 0 0 38px;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3.1rem);
+}
+
+.run_experiment_card p {
+  margin: 0;
+  color: #b8bdc0;
+  line-height: 1.6;
+}
+
+.run_experiment_eyebrow {
+  color: #71d6c5 !important;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.experiment_section + .experiment_section { margin-top: 38px; }
+.experiment_section h2 { margin: 0 0 12px; color: #e8e9e7; font-size: 1rem; font-weight: 750; }
+.experiment_knot_row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 24px; align-items: center; }
+.experiment_knot_row h2 { margin: 0; white-space: nowrap; }
+.experiment_knot_controls { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
+.experiment_knot_picker { display: flex; align-items: center; gap: 7px; border: 1px solid #3b3e41; border-radius: 12px; background: rgba(32, 33, 36, 0.92); padding: 7px; }
+.experiment_knot_to { color: #b8bdc0; font-size: 0.88rem; font-weight: 700; }
+.experiment_add_knots { min-height: 38px; border: 1px solid #f2f2ef; border-radius: 10px; background: #f2f2ef; color: #1b1c1d; padding: 0 16px; font-weight: 750; cursor: pointer; }
+.experiment_add_knots:not(:disabled):hover { border-color: #71d6c5; background: #71d6c5; }
+.experiment_add_knots:disabled { opacity: 0.45; cursor: default; }
+.algorithm_row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: center; }
+.algorithm_row select { width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid #505457; border-radius: 10px; background: #303235; color: #f3f3f1; padding: 11px 38px 11px 12px; cursor: pointer; }
+.algorithm_row select:focus-visible, .algorithm_delete:focus-visible, .algorithm_insert:focus-visible, .experiment_add_knots:focus-visible, .experiment_knot_picker select:focus-visible { outline: 2px solid #71d6c5; outline-offset: 2px; }
+.algorithm_rows, .algorithm_row_group { display: flex; flex-direction: column; }
+.algorithm_row { grid-template-columns: minmax(170px, 1fr) auto minmax(170px, 1fr) auto; }
+.algorithm_until { color: #b8bdc0; font-size: 0.88rem; font-weight: 700; }
+.algorithm_row.experiment_move_picker { grid-template-columns: minmax(0, 1fr); }
+.experiment_twist_options { min-width: 0; margin: 20px 0 0; padding: 16px; border: 1px solid #505457; border-radius: 10px; }
+.experiment_twist_options legend { padding: 0 6px; }
+.experiment_twist_sides { display: grid; grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr); align-items: start; gap: 16px; overflow-x: auto; }
+.experiment_twist_segment { display: flex; flex-direction: column; gap: 12px; min-width: max-content; }
+.experiment_twist_segment select { width: 100%; box-sizing: border-box; border: 1px solid #505457; border-radius: 10px; background: #303235; color: #f3f3f1; padding: 11px 12px; }
+.experiment_twist_strand { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.experiment_twist_strand .move_toggle_group { flex-shrink: 0; }
+.experiment_twist_to { align-self: start; padding-top: 40px; }
+.experiment_twist_list { min-height: 80px; margin: 0; padding: 10px 10px 10px 28px; border: 1px solid #505457; border-radius: 8px; background: #232527; }
+.experiment_twist_segment select:focus-visible, .experiment_twist_list:focus-visible { outline: 2px solid #71d6c5; outline-offset: 2px; }
+.experiment_twist_options button:disabled { opacity: 0.45; cursor: default; }
+.experiment_moves { padding-left: 24px; }
+.experiment_moves li { padding: 6px 0; }
+.experiment_moves li span { margin-right: 12px; }
+.algorithm_delete { border: 1px solid #64484b; border-radius: 9px; background: #34282a; color: #e8b6ba; padding: 10px 12px; cursor: pointer; }
+.algorithm_delete:hover { border-color: #b46b72; background: #422e31; color: #ffd9dc; }
+.algorithm_insert { align-self: center; margin: 7px 0; border: 0; border-radius: 999px; background: transparent; color: #8f9699; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; }
+.algorithm_insert:hover { background: #303235; color: #71d6c5; }
+
+@media (max-width: 680px) {
+  .run_experiment { padding: 16px; }
+  .experiment_knot_row { grid-template-columns: 1fr; gap: 12px; }
+  .experiment_knot_controls { flex-wrap: wrap; justify-content: flex-start; }
+  .algorithm_row { grid-template-columns: minmax(0, 1fr) auto; }
+  .algorithm_row select:first-child, .algorithm_delete { grid-column: 1 / -1; }
+}
+
+/* background color for the visual component */
 .background {
   background-color: #f0f0f0; /* choose any color you like */
-  height: 100dvh;
+  height: 100%;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -1130,4 +1311,56 @@ input {
   .right_col {
     min-height: 70dvh;
   }
+}
+
+/* Connection feedback stays above the visual workspace. */
+.visual_background {
+  flex-direction: column;
+}
+.visual_background > .container {
+  flex: 1;
+  min-height: 0;
+  margin: 12px 0;
+}
+.database_notice {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: min(98%, 1600px);
+  margin-top: 12px;
+  padding: 12px 16px;
+  border: 1px solid #477d74;
+  border-radius: 10px;
+  background: #203c37;
+  color: #d5f5ec;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.database_notice--error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-color: #a77754;
+  background: #3c2d23;
+  color: #ffe3cf;
+}
+.database_notice button {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.move_fieldset,
+.knot_picker_fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.knot_picker_fieldset {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.knot_picker_fieldset .knot_picker {
+  pointer-events: auto;
 }

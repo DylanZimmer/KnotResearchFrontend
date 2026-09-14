@@ -1,8 +1,46 @@
 import type { RolfKnotNames, Geometry, Invariants, GeometricLine, CrossingSpec, Handedness } from './types'
 
-//const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-const apiBaseUrl = "https://knots-backend-smjr.onrender.com";
-//const apiBaseUrl = "http://localhost:8080";
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.DEV ? 'http://localhost:8080' : 'https://knots-backend-smjr.onrender.com')).replace(/\/$/, '');
+
+// Match the experiment controller's class-level @RequestMapping.
+const experimentsUrl = `${apiBaseUrl}/api/experiments`;
+
+export async function startExperiment(knotIds: number[]): Promise<number> {
+  const res = await fetch(`${experimentsUrl}/start_experiment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(knotIds),
+  });
+  if (!res.ok) throw new Error(`Failed to start experiment (${res.status})`);
+  const body = await res.text();
+  if (!body.trim()) {
+    throw new Error('The experiment was started, but start_experiment must return its experiment ID before moves can run.');
+  }
+  const payload = JSON.parse(body);
+  const experimentId = typeof payload === 'number' ? payload : payload?.experimentId;
+  if (!Number.isSafeInteger(experimentId) || experimentId < 0) {
+    throw new Error('The experiment was started, but the server returned an invalid experiment ID.');
+  }
+  return experimentId;
+}
+
+async function postExperimentMove(endpoint: string, params: Record<string, string>) {
+  const res = await fetch(`${experimentsUrl}/${endpoint}?${new URLSearchParams(params)}`, { method: 'POST' });
+  if (!res.ok) throw new Error(`Failed to perform move (${res.status})`);
+}
+
+export async function performMoveSingleInstance(experimentId: number, ogKnotId: number, stateNum: number, move: string) {
+  await postExperimentMove('perform_move_single_instance', {
+    experimentId: String(experimentId), ogKnotId: String(ogKnotId), stateNum: String(stateNum), move,
+  });
+}
+
+export async function performMoveForState(experimentId: number, stateNum: number, move: string) {
+  await postExperimentMove('perform_move_for_state', {
+    experimentId: String(experimentId), stateNum: String(stateNum), move,
+  });
+}
 
 type JsonRecord = Record<string, unknown>;
 
@@ -169,7 +207,7 @@ export async function performMirrorGeometry() {
     method: "POST",
   });
   if (!res.ok) {
-    throw new Error("Failed to flip knot orientation");
+    throw new Error("Failed to create mirror knot");
   }
 }
 
@@ -178,7 +216,7 @@ export async function performOrientationFlipGeometry() {
     method: "POST",
   });
   if (!res.ok) {
-    throw new Error("Failed to create mirror knot");
+    throw new Error("Failed to flip knot orientation");
   }
 }
 
