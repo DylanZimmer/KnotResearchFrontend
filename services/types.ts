@@ -1,6 +1,21 @@
 export type NumPair = [number, number];
 export type NumPairs = NumPair[];
 
+/** Serialized values of com.knots.backend.models.dtos.MoveType. */
+export type MoveType =
+  | 'startExperiment'
+  | 'mirror'
+  | 'flip'
+  | 'addTwist'
+  | 'addPoke'
+  | 'slide'
+  | 'saddle';
+
+export enum Sign {
+  Negative = -1,
+  Positive = 1,
+}
+
 export type CrossingSpec = [
   crossing_id: number,
   under_line: number | null,

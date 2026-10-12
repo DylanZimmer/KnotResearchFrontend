@@ -3,6 +3,7 @@
   // Usage: container.innerHTML = drawSvg(geometry);
 
   import type { Geometry, NumPair } from "./types";
+  import { Sign } from "./types";
 
   // ── geometry helpers ──────────────────────────────────────────────────────
 
@@ -107,7 +108,7 @@
   
         // right-handed: loop bulges in positive perp direction (down for H, right for V)
         // left-handed:  loop bulges in negative perp direction (up for H, left for V)
-        const sign = handedness === "right" ? 1 : -1;
+        const sign = handedness === "right" ? Sign.Positive : Sign.Negative;
   
         // Loop geometry. REACH is how far along the strand the loop extends before
         // re-crossing. BULGE is how far it extends perpendicularly. The re-crossing

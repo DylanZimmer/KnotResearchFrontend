@@ -1,10 +1,11 @@
-import type { RolfKnotNames, Geometry, Invariants, GeometricLine, CrossingSpec, Handedness } from './types'
+import type { RolfKnotNames, Geometry, Invariants, GeometricLine, CrossingSpec, Handedness, MoveType } from './types'
+import type { AddTwistRequest } from './experiment'
 
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.DEV ? 'http://localhost:8080' : 'https://knots-backend-smjr.onrender.com')).replace(/\/$/, '');
 
 // Match the experiment controller's class-level @RequestMapping.
-const experimentsUrl = `${apiBaseUrl}/api/experiments`;
+const experimentsUrl = `${apiBaseUrl}/api/exp`;
 
 export async function startExperiment(knotIds: number[]): Promise<number> {
   const res = await fetch(`${experimentsUrl}/start_experiment`, {
@@ -25,18 +26,32 @@ export async function startExperiment(knotIds: number[]): Promise<number> {
   return experimentId;
 }
 
+/** Submit the ordered requests using the backend's MoveRequest JSON format. */
+export async function runExperiment(experimentId: number, requests: readonly AddTwistRequest[]): Promise<void> {
+  if (!Number.isSafeInteger(experimentId) || experimentId < 0) {
+    throw new Error('A valid experiment ID is required to run an experiment.');
+  }
+  const params = new URLSearchParams({ experimentId: String(experimentId) });
+  const res = await fetch(`${experimentsUrl}/run_experiment?${params}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requests),
+  });
+  if (!res.ok) throw new Error(`Failed to run experiment (${res.status})`);
+}
+
 async function postExperimentMove(endpoint: string, params: Record<string, string>) {
   const res = await fetch(`${experimentsUrl}/${endpoint}?${new URLSearchParams(params)}`, { method: 'POST' });
   if (!res.ok) throw new Error(`Failed to perform move (${res.status})`);
 }
 
-export async function performMoveSingleInstance(experimentId: number, ogKnotId: number, stateNum: number, move: string) {
+export async function performMoveSingleInstance(experimentId: number, ogKnotId: number, stateNum: number, move: MoveType) {
   await postExperimentMove('perform_move_single_instance', {
     experimentId: String(experimentId), ogKnotId: String(ogKnotId), stateNum: String(stateNum), move,
   });
 }
 
-export async function performMoveForState(experimentId: number, stateNum: number, move: string) {
+export async function performMoveForState(experimentId: number, stateNum: number, move: MoveType) {
   await postExperimentMove('perform_move_for_state', {
     experimentId: String(experimentId), stateNum: String(stateNum), move,
   });
@@ -194,7 +209,7 @@ export async function fetchInvariantInfo(knotId: number): Promise<Invariants> {
 };
 
 export async function postBaseGeometryInfo(knotId: number) {
-  const res = await fetch(`${apiBaseUrl}/api/moves/populate_current?knotId=${knotId}`, {
+  const res = await fetch(`${apiBaseUrl}/api/geom/switch_display?knotId=${knotId}`, {
     method: "POST",
   });
   if (!res.ok) {
